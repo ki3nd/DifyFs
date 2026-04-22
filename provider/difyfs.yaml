@@ -21,9 +21,9 @@ credentials_schema:
       en_US: "Service API Endpoint"
       zh_Hans: "Service API Endpoint"
     placeholder:
-      en_US: "http://127.0.0.1/v1"
+      en_US: "http://api:5001/v1"
     help:
-      en_US: "Dify Service API base URL, e.g. http://127.0.0.1/v1"
+      en_US: "Dify Service API base URL, e.g. http://api:5001/v1"
   - name: api_key
     type: secret-input
     required: true
