@@ -1,14 +1,19 @@
-# difyfs
+# DifyFS
 
-**difyfs** turns a [Dify](https://dify.ai) knowledge base dataset into a virtual filesystem you can navigate and query with familiar Unix-style tools — `ls`, `cat`, `grep`, `find`, and `search`.
+Navigate and query your Dify knowledge base like a filesystem: ls, cat, grep, find, and search over documents organized by virtual paths.
+
+**Author:** [ki3nd](https://github.com/ki3nd)  
+**Type:** tool  
+**Github Repo:** [https://github.com/ki3nd/DifyFs](https://github.com/ki3nd/DifyFs)  
+**Github Issues:** [issues](https://github.com/ki3nd/DifyFs/issues)  
 
 ## Concept
 
 The idea comes from two sources:
 
-- **[Mintlify ChromaFS](https://mintlify.com)** — treats a vector store as a filesystem, assigning each document a `slug` path (e.g. `guides/quickstart`) and using the vector DB as both a coarse filter and a content store. Grep works in two stages: coarse filter via vector similarity, then fine line-by-line regex.
+* **[Mintlify ChromaFS](https://mintlify.com)** — treats a vector store as a filesystem, assigning each document a `slug` path (e.g. `guides/quickstart`) and using the vector DB as both a coarse filter and a content store. Grep works in two stages: coarse filter via vector similarity, then fine line-by-line regex.
 
-- **[vkfs](https://github.com/ZeroZ-lab/vkfs)** — a Go implementation of the same idea, supporting SQLite and Zilliz backends. difyfs adapts the same virtual path model and two-stage grep to work on top of the Dify Knowledge Base API.
+* **[vkfs](https://github.com/ZeroZ-lab/vkfs)** — a Go implementation of the same idea, supporting SQLite and Zilliz backends. difyfs adapts the same virtual path model and two-stage grep to work on top of the Dify Knowledge Base API.
 
 Each document in your dataset gets a `slug` metadata field — its virtual path in the filesystem. Tools then navigate and read documents by slug.
 
@@ -77,8 +82,9 @@ grep dataset_id=<id> pattern=access_token path=guides
 ```
 
 Two modes:
-- **Single-file mode** — when `path` matches an exact slug. Fetches all chunks → regex. 100% accurate.
-- **Directory mode** — when `path` is a prefix or empty. Uses Dify full-text search as a coarse filter (top_k segments), then applies regex line by line. Best-effort — recall depends on `top_k`.
+
+* **Single-file mode** — when `path` matches an exact slug. Fetches all chunks and applies regex. 100% accurate.
+* **Directory mode** — when `path` is a prefix or empty. Uses Dify full-text search as a coarse filter (top_k segments), then applies regex line by line. Best-effort — recall depends on `top_k`.
 
 ### `find` — Find files by name pattern
 
@@ -107,14 +113,15 @@ guides/api/endpoints    → file at /guides/api/endpoints
 
 Virtual directories are derived automatically — any common prefix becomes a navigable directory. There is no need to create directory entries explicitly.
 
-Use `metadata_set` to assign slugs to documents in bulk before navigating the filesystem.
+Use `metadata_set` to assign slugs to documents before navigating the filesystem. Documents without a slug fall back to using their document name as the path, placed at root.
 
 ## Limitations
 
-- **No overlap support in `cat`** — chunk overlap produces duplicate text at boundaries. Use overlap = 0 when configuring your dataset chunking.
-- **Directory mode grep is best-effort** — Dify's retrieve API returns at most `top_k` chunks. Segments not in the top-k are not searched.
-- **No write operations** — difyfs is read-only by design. Document creation and deletion are not supported.
+* **No overlap support in `cat`** — chunk overlap produces duplicate text at boundaries. Use overlap = 0 when configuring your dataset chunking.
+* **Directory mode grep is best-effort** — Dify's retrieve API returns at most `top_k` chunks. Segments not in the top-k are not searched.
+* **No write operations** — difyfs is read-only by design. Document creation and deletion are not supported.
+
 ## Future Work
 
-- **Group-based filtering** — a `group` metadata field on documents could be used to scope `ls`, `find`, `grep`, and `search` to a named group (e.g. `group=engineering`).
-- **Public/private access control** — a `public` metadata field (`true`/`false`) could let tools filter out private documents, enabling basic visibility control within a shared dataset.
+* **Group-based filtering** — a `group` metadata field on documents could be used to scope `ls`, `find`, `grep`, and `search` to a named group (e.g. `group=engineering`).
+* **Public/private access control** — a `public` metadata field (`true`/`false`) could let tools filter out private documents, enabling basic visibility control within a shared dataset.
