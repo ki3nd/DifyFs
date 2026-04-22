@@ -1,0 +1,33 @@
+identity:
+  name: "cat"
+  author: "ki3nd"
+  label:
+    en_US: "Read File"
+    zh_Hans: "Read File"
+description:
+  human:
+    en_US: "Read the full content of a document in the Dify dataset virtual filesystem by its slug path."
+    zh_Hans: "Read the full content of a document by its slug path."
+  llm: "Read and return the full text content of a document at the given virtual path. Reconstructs the document by joining all its text chunks in order."
+parameters:
+  - name: dataset_id
+    type: string
+    required: true
+    label:
+      en_US: "Dataset ID"
+    human_description:
+      en_US: "The ID of the Dify dataset"
+    llm_description: "The Dify dataset ID"
+    form: llm
+  - name: path
+    type: string
+    required: true
+    label:
+      en_US: "Path"
+    human_description:
+      en_US: "Virtual file path (slug), e.g. guides/quickstart"
+    llm_description: "Virtual file path matching the document's slug, e.g. 'guides/quickstart'"
+    form: llm
+extra:
+  python:
+    source: tools/cat.py

@@ -1,0 +1,70 @@
+identity:
+  name: "search"
+  author: "ki3nd"
+  label:
+    en_US: "Search"
+    zh_Hans: "Search"
+description:
+  human:
+    en_US: "Perform semantic, full-text, or hybrid search across documents in a Dify dataset virtual filesystem."
+    zh_Hans: "Perform semantic, full-text, or hybrid search across documents."
+  llm: "Search for content in a Dify dataset using semantic (vector), full-text (keyword), or hybrid search. Optionally scope to a virtual path prefix. Returns matching chunks with their virtual file path, relevance score, and content preview."
+parameters:
+  - name: dataset_id
+    type: string
+    required: true
+    label:
+      en_US: "Dataset ID"
+    human_description:
+      en_US: "The ID of the Dify dataset to search"
+    llm_description: "The Dify dataset ID to search in"
+    form: llm
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: "Query"
+    human_description:
+      en_US: "Search query string"
+    llm_description: "Natural language query or keyword to search for"
+    form: llm
+  - name: path
+    type: string
+    required: false
+    label:
+      en_US: "Path Filter"
+    human_description:
+      en_US: "Optional: limit search to documents under this virtual path, e.g. guides"
+    llm_description: "Optional virtual path prefix to scope the search, e.g. 'guides' only searches docs whose slug starts with 'guides/'"
+    form: llm
+  - name: top_k
+    type: number
+    required: false
+    label:
+      en_US: "Top K"
+    human_description:
+      en_US: "Number of results to return (default 5)"
+    llm_description: "Number of results to return, default 5"
+    form: llm
+  - name: search_method
+    type: select
+    required: false
+    label:
+      en_US: "Search Method"
+    human_description:
+      en_US: "Search method: semantic_search, full_text_search, or hybrid_search"
+    llm_description: "Search method to use. semantic_search for meaning-based, full_text_search for keywords, hybrid_search for both."
+    options:
+      - value: semantic_search
+        label:
+          en_US: Semantic Search
+      - value: full_text_search
+        label:
+          en_US: Full Text Search
+      - value: hybrid_search
+        label:
+          en_US: Hybrid Search
+    form: llm
+extra:
+  python:
+    source: tools/search.py

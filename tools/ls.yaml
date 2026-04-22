@@ -1,0 +1,33 @@
+identity:
+  name: "ls"
+  author: "ki3nd"
+  label:
+    en_US: "List Directory"
+    zh_Hans: "List Directory"
+description:
+  human:
+    en_US: "List the virtual filesystem contents of a Dify dataset. Shows documents and virtual directories based on their slug metadata."
+    zh_Hans: "List the virtual filesystem contents of a Dify dataset."
+  llm: "List files and directories at a virtual path within a Dify dataset. Documents are organized by their 'slug' metadata field. Use path '/' to see top-level entries. Example: ls dataset_id / shows all top-level dirs and files."
+parameters:
+  - name: dataset_id
+    type: string
+    required: true
+    label:
+      en_US: "Dataset ID"
+    human_description:
+      en_US: "The ID of the Dify dataset to browse"
+    llm_description: "The Dify dataset ID to list contents of"
+    form: llm
+  - name: path
+    type: string
+    required: false
+    label:
+      en_US: "Path"
+    human_description:
+      en_US: "Virtual directory path, e.g. / or guides or guides/api"
+    llm_description: "Virtual directory path to list. Use '/' or empty for root. Example: 'guides' lists contents of the guides/ directory."
+    form: llm
+extra:
+  python:
+    source: tools/ls.py

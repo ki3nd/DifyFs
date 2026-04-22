@@ -1,0 +1,36 @@
+version: 0.0.1
+type: plugin
+author: ki3nd
+name: difyfs
+label:
+  en_US: DifyFS
+  ja_JP: DifyFS
+  zh_Hans: DifyFS
+  pt_BR: DifyFS
+description:
+  en_US: Navigate and query your Dify knowledge base like a filesystem — ls, cat, grep, find, and search over documents organized by virtual paths.
+  ja_JP: Dify ナレッジベースをファイルシステムとして操作 — ls、cat、grep、find、search で仮想パスに基づいてドキュメントを閲覧・検索できます。
+  zh_Hans: 像文件系统一样浏览和查询 Dify 知识库 — 通过虚拟路径对文档执行 ls、cat、grep、find 和 search 操作。
+  pt_BR: Navegue e consulte sua base de conhecimento Dify como um sistema de arquivos — ls, cat, grep, find e search sobre documentos organizados por caminhos virtuais.
+icon: icon.svg
+resource:
+  memory: 268435456
+  permission:
+    tool:
+      enabled: true
+plugins:
+  tools:
+    - provider/difyfs.yaml
+meta:
+  version: 0.0.1
+  arch:
+    - amd64
+    - arm64
+  runner:
+    language: python
+    version: "3.12"
+    entrypoint: main
+  minimum_dify_version: 0.0.1
+created_at: 2026-04-22T22:31:46.847271455+07:00
+privacy: PRIVACY.md
+verified: false

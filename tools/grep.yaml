@@ -1,0 +1,51 @@
+identity:
+  name: "grep"
+  author: "ki3nd"
+  label:
+    en_US: "Grep"
+    zh_Hans: "Grep"
+description:
+  human:
+    en_US: "Search for a pattern in files within the Dify dataset virtual filesystem. Returns matching lines with file path and line number."
+    zh_Hans: "Search for a pattern in files within the Dify dataset virtual filesystem."
+  llm: "Search for a text pattern across documents in a Dify dataset virtual filesystem. Works like Unix grep: returns matching lines in 'path:lineNum — line' format. Single file mode (exact slug path) is 100% accurate. Directory mode (path prefix) uses full-text search as coarse filter then regex, top_k=50."
+parameters:
+  - name: dataset_id
+    type: string
+    required: true
+    label:
+      en_US: "Dataset ID"
+    human_description:
+      en_US: "The ID of the Dify dataset"
+    llm_description: "The Dify dataset ID"
+    form: llm
+  - name: pattern
+    type: string
+    required: true
+    label:
+      en_US: "Pattern"
+    human_description:
+      en_US: "Regex or text pattern to search for"
+    llm_description: "Text or regex pattern to search for. Examples: 'access_token', 'Bearer\\s+\\w+', '2026-\\d{2}'"
+    form: llm
+  - name: path
+    type: string
+    required: false
+    label:
+      en_US: "Path"
+    human_description:
+      en_US: "Virtual path to search in. A slug path (e.g. guides/readme) searches that file only. A prefix (e.g. guides) searches all docs under guides/."
+    llm_description: "Virtual path. Exact slug (e.g. 'guides/readme') = single-file mode, 100% accurate. Directory prefix (e.g. 'guides') = directory mode, best-effort top_k=50. Empty = search entire dataset."
+    form: llm
+  - name: top_k
+    type: number
+    required: false
+    label:
+      en_US: "Top K (directory mode)"
+    human_description:
+      en_US: "Max segments to search in directory mode (default 50)"
+    llm_description: "Max segments retrieved in directory mode. Default 50. Higher = better recall but slower."
+    form: llm
+extra:
+  python:
+    source: tools/grep.py

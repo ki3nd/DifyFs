@@ -1,0 +1,12 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" rx="8" fill="#FFFFFF"/>
+
+  <!-- Folder body -->
+  <path d="M8 28V17C8 15.9 8.9 15 10 15H18L20 13H30C31.1 13 32 13.9 32 15V28C32 29.1 31.1 30 30 30H10C8.9 30 8 29.1 8 28Z"
+        fill="#2563EB" fill-opacity="0.12" stroke="#2563EB" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <!-- Directory listing lines -->
+  <path d="M13 20.5H27" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M13 23.5H22" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M13 26.5H17" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

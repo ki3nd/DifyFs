@@ -1,0 +1,48 @@
+identity:
+  author: "ki3nd"
+  name: "difyfs"
+  label:
+    en_US: "DifyFS"
+    zh_Hans: "DifyFS"
+    pt_BR: "DifyFS"
+    ja_JP: "DifyFS"
+  description:
+    en_US: "Navigate and query your Dify knowledge base like a filesystem — ls, cat, grep, find, and search over documents organized by virtual paths."
+    zh_Hans: "像文件系统一样浏览和查询 Dify 知识库 — 通过虚拟路径对文档执行 ls、cat、grep、find 和 search 操作。"
+    pt_BR: "Navegue e consulte sua base de conhecimento Dify como um sistema de arquivos — ls, cat, grep, find e search sobre documentos organizados por caminhos virtuais."
+    ja_JP: "Dify ナレッジベースをファイルシステムとして操作 — 仮想パスに基づいてドキュメントを ls、cat、grep、find、search で閲覧・検索できます。"
+  icon: "icon.svg"
+
+credentials_schema:
+  - name: service_api_endpoint
+    type: text-input
+    required: true
+    label:
+      en_US: "Service API Endpoint"
+      zh_Hans: "Service API Endpoint"
+    placeholder:
+      en_US: "http://127.0.0.1/v1"
+    help:
+      en_US: "Dify Service API base URL, e.g. http://127.0.0.1/v1"
+  - name: api_key
+    type: secret-input
+    required: true
+    label:
+      en_US: "Dataset API Key"
+      zh_Hans: "Dataset API Key"
+    placeholder:
+      en_US: "dataset-xxxxxxxxxxxxxxxx"
+    help:
+      en_US: "Dify dataset API key starting with 'dataset-'"
+
+tools:
+  - tools/metadata_set.yaml
+  - tools/ls.yaml
+  - tools/stat.yaml
+  - tools/cat.yaml
+  - tools/grep.yaml
+  - tools/find.yaml
+  - tools/search.yaml
+extra:
+  python:
+    source: provider/difyfs.py

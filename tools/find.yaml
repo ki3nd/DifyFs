@@ -1,0 +1,42 @@
+identity:
+  name: "find"
+  author: "ki3nd"
+  label:
+    en_US: "Find Files"
+    zh_Hans: "Find Files"
+description:
+  human:
+    en_US: "Search for files matching a name pattern within a virtual directory of the Dify dataset filesystem."
+    zh_Hans: "Search for files matching a name pattern within a virtual directory."
+  llm: "Find files whose slug path matches a glob name pattern within a given directory path. Similar to Unix 'find <path> -name <pattern>'. Returns list of matching virtual paths."
+parameters:
+  - name: dataset_id
+    type: string
+    required: true
+    label:
+      en_US: "Dataset ID"
+    human_description:
+      en_US: "The ID of the Dify dataset"
+    llm_description: "The Dify dataset ID"
+    form: llm
+  - name: path
+    type: string
+    required: false
+    label:
+      en_US: "Starting Path"
+    human_description:
+      en_US: "Directory to search in, e.g. / or guides. Defaults to root."
+    llm_description: "Starting directory path for the search. Use '/' or empty for all files."
+    form: llm
+  - name: name_pattern
+    type: string
+    required: true
+    label:
+      en_US: "Name Pattern"
+    human_description:
+      en_US: "Glob pattern to match file names, e.g. *.pdf or *quickstart*"
+    llm_description: "Glob pattern to match against the file name (last path segment). Examples: '*.pdf', '*api*', 'readme*'"
+    form: llm
+extra:
+  python:
+    source: tools/find.py

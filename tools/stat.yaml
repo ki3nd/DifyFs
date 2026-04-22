@@ -1,0 +1,33 @@
+identity:
+  name: "stat"
+  author: "ki3nd"
+  label:
+    en_US: "Stat File"
+    zh_Hans: "Stat File"
+description:
+  human:
+    en_US: "Show detailed metadata for a document at a virtual path in the Dify dataset filesystem."
+    zh_Hans: "Show detailed metadata for a document at a virtual path."
+  llm: "Show file metadata for a document at the given virtual path (slug). Returns name, slug, word count, token count, indexing status, creation time, and all custom metadata."
+parameters:
+  - name: dataset_id
+    type: string
+    required: true
+    label:
+      en_US: "Dataset ID"
+    human_description:
+      en_US: "The ID of the Dify dataset"
+    llm_description: "The Dify dataset ID"
+    form: llm
+  - name: path
+    type: string
+    required: true
+    label:
+      en_US: "Path"
+    human_description:
+      en_US: "Virtual file path (slug), e.g. guides/quickstart"
+    llm_description: "Virtual file path matching the document's slug, e.g. 'guides/quickstart'"
+    form: llm
+extra:
+  python:
+    source: tools/stat.py

@@ -1,0 +1,51 @@
+identity:
+  name: "metadata_set"
+  author: "ki3nd"
+  label:
+    en_US: "Set Document Metadata"
+    zh_Hans: "Set Document Metadata"
+description:
+  human:
+    en_US: "Assign metadata (slug, isPublic, groups, or custom fields) to a document in a Dify dataset. The slug field defines the document's virtual path in the filesystem (e.g. 'guides/quickstart')."
+    zh_Hans: "Assign metadata (slug, isPublic, groups, or custom fields) to a document in a Dify dataset."
+  llm: "Set a metadata key-value pair on a Dify dataset document. Use slug to assign a virtual filesystem path like 'guides/quickstart'. Use isPublic (true/false) and groups (JSON array string) for access control."
+parameters:
+  - name: dataset_id
+    type: string
+    required: true
+    label:
+      en_US: "Dataset ID"
+    human_description:
+      en_US: "The ID of the Dify dataset"
+    llm_description: "The Dify dataset ID"
+    form: llm
+  - name: document_id
+    type: string
+    required: true
+    label:
+      en_US: "Document ID"
+    human_description:
+      en_US: "The ID of the document to update"
+    llm_description: "The document ID to set metadata on"
+    form: llm
+  - name: key
+    type: string
+    required: true
+    label:
+      en_US: "Metadata Key"
+    human_description:
+      en_US: "Metadata field name, e.g. slug, isPublic, groups"
+    llm_description: "Metadata field name. Use 'slug' to set the virtual filesystem path."
+    form: llm
+  - name: value
+    type: string
+    required: true
+    label:
+      en_US: "Metadata Value"
+    human_description:
+      en_US: "Value for the metadata field"
+    llm_description: "Value for the metadata field. For slug: a path like 'guides/quickstart'. For isPublic: 'true' or 'false'."
+    form: llm
+extra:
+  python:
+    source: tools/metadata_set.py
