@@ -4,14 +4,14 @@ Navigate and query your Dify knowledge base like a filesystem: ls, cat, grep, fi
 
 **Author:** [ki3nd](https://github.com/ki3nd)  
 **Type:** tool  
-**Github Repo:** [https://github.com/ki3nd/DifyFs](https://github.com/ki3nd/DifyFs)  
-**Github Issues:** [issues](https://github.com/ki3nd/DifyFs/issues)  
+**Github Repo:** [https://github.com/ki3nd/DifyFS](https://github.com/ki3nd/DifyFS)  
+**Github Issues:** [issues](https://github.com/ki3nd/DifyFS/issues)  
 
 ## Concept
 
 The idea comes from two sources:
 
-* **[Mintlify ChromaFS](https://mintlify.com)** — treats a vector store as a filesystem, assigning each document a `slug` path (e.g. `guides/quickstart`) and using the vector DB as both a coarse filter and a content store. Grep works in two stages: coarse filter via vector similarity, then fine line-by-line regex.
+* **[Mintlify ChromaFS](https://www.mintlify.com/blog/how-we-built-a-virtual-filesystem-for-our-assistant)** — treats a vector store as a filesystem, assigning each document a `slug` path (e.g. `guides/quickstart`) and using the vector DB as both a coarse filter and a content store. Grep works in two stages: coarse filter via vector similarity, then fine line-by-line regex.
 
 * **[vkfs](https://github.com/ZeroZ-lab/vkfs)** — a Go implementation of the same idea, supporting SQLite and Zilliz backends. difyfs adapts the same virtual path model and two-stage grep to work on top of the Dify Knowledge Base API.
 
