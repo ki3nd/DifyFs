@@ -1,4 +1,4 @@
-version: 0.0.1
+version: 0.0.2
 type: plugin
 author: ki3nd
 name: difyfs
@@ -22,7 +22,7 @@ plugins:
   tools:
     - provider/difyfs.yaml
 meta:
-  version: 0.0.1
+  version: 0.0.2
   arch:
     - amd64
     - arm64
