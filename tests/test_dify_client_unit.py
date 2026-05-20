@@ -66,7 +66,7 @@ class TestGetSlug:
             "id": "doc1",
             "name": "readme.pdf",
             "doc_metadata": [
-                {"name": "isPublic", "value": "true"},
+                {"name": "is_public", "value": "true"},
                 {"name": "groups", "value": "[]"},
             ],
         }
@@ -78,7 +78,7 @@ class TestGetSlug:
             "id": "doc1",
             "name": "readme.pdf",
             "doc_metadata": [
-                {"name": "isPublic", "value": "true"},
+                {"name": "is_public", "value": "true"},
                 {"name": "slug", "value": "api/reference"},
                 {"name": "groups", "value": "[]"},
             ],
@@ -135,7 +135,7 @@ class TestEnsureMetadataField:
         client = make_client()
         client.get_metadata_fields = MagicMock(return_value=[
             {"id": "field-1", "name": "slug"},
-            {"id": "field-2", "name": "isPublic"},
+            {"id": "field-2", "name": "is_public"},
         ])
         client._post = MagicMock()
 
@@ -158,7 +158,7 @@ class TestEnsureMetadataField:
     def test_creates_field_when_other_fields_exist(self):
         client = make_client()
         client.get_metadata_fields = MagicMock(return_value=[
-            {"id": "field-2", "name": "isPublic"},
+            {"id": "field-2", "name": "is_public"},
         ])
         client._post = MagicMock(return_value={"id": "new-id", "name": "groups"})
 
@@ -167,6 +167,97 @@ class TestEnsureMetadataField:
 
 
 # ── get_segments ordering ─────────────────────────────────────────────────────
+
+class TestRetrieve:
+    def _make_client(self):
+        client = make_client()
+        client._post = MagicMock(return_value={"records": []})
+        return client
+
+    def test_no_metadata_filter_omits_field(self):
+        client = self._make_client()
+        client.retrieve("ds1", "hello")
+        body = client._post.call_args[0][1]
+        assert "metadata_filtering_conditions" not in body["retrieval_model"]
+
+    def test_metadata_filter_none_omits_field(self):
+        client = self._make_client()
+        client.retrieve("ds1", "hello", metadata_filtering_conditions=None)
+        body = client._post.call_args[0][1]
+        assert "metadata_filtering_conditions" not in body["retrieval_model"]
+
+    def test_metadata_filter_injected_inside_retrieval_model(self):
+        client = self._make_client()
+        mfc = {
+            "logical_operator": "or",
+            "conditions": [{"name": "slug", "comparison_operator": "is", "value": "a/b"}],
+        }
+        client.retrieve("ds1", "hello", metadata_filtering_conditions=mfc)
+        body = client._post.call_args[0][1]
+        assert body["retrieval_model"]["metadata_filtering_conditions"] == mfc
+
+    def test_metadata_filter_not_at_top_level(self):
+        client = self._make_client()
+        mfc = {"logical_operator": "or", "conditions": []}
+        client.retrieve("ds1", "hello", metadata_filtering_conditions=mfc)
+        body = client._post.call_args[0][1]
+        assert "metadata_filtering_conditions" not in body
+
+    def test_search_method_and_top_k_forwarded(self):
+        client = self._make_client()
+        client.retrieve("ds1", "q", search_method="full_text_search", top_k=10)
+        body = client._post.call_args[0][1]
+        assert body["retrieval_model"]["search_method"] == "full_text_search"
+        assert body["retrieval_model"]["top_k"] == 10
+
+
+class TestGetDocumentInfo:
+    def test_calls_correct_endpoint(self):
+        client = make_client()
+        client._get = MagicMock(return_value={"id": "doc1", "doc_metadata": []})
+        result = client.get_document_info("ds1", "doc1")
+        client._get.assert_called_once_with("/datasets/ds1/documents/doc1")
+        assert result["id"] == "doc1"
+
+    def test_returns_doc_with_metadata(self):
+        client = make_client()
+        doc = {
+            "id": "doc1",
+            "doc_metadata": [
+                {"id": "f1", "name": "slug", "value": "guides/intro"},
+                {"id": "f2", "name": "is_public", "value": "true"},
+            ],
+        }
+        client._get = MagicMock(return_value=doc)
+        result = client.get_document_info("ds1", "doc1")
+        assert len(result["doc_metadata"]) == 2
+
+
+class TestUpdateDocumentMetadata:
+    def test_sends_all_entries_in_one_call(self):
+        client = make_client()
+        client._post = MagicMock(return_value={})
+        metadata_list = [
+            {"id": "f1", "name": "slug", "value": "guides/intro"},
+            {"id": "f2", "name": "is_public", "value": "true"},
+            {"name": "groups", "value": "eng"},  # new field, no id
+        ]
+        client.update_document_metadata("ds1", "doc1", metadata_list)
+        client._post.assert_called_once()
+        body = client._post.call_args[0][1]
+        op = body["operation_data"][0]
+        assert op["document_id"] == "doc1"
+        assert op["metadata_list"] == metadata_list
+
+    def test_single_post_call_regardless_of_list_size(self):
+        client = make_client()
+        client._post = MagicMock(return_value={})
+        client.update_document_metadata("ds1", "doc1", [
+            {"id": f"f{i}", "name": f"field{i}", "value": str(i)}
+            for i in range(10)
+        ])
+        assert client._post.call_count == 1
+
 
 class TestGetSegments:
     def test_segments_sorted_by_position(self):

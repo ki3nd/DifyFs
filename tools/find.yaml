@@ -37,6 +37,15 @@ parameters:
       en_US: "Glob pattern to match file names, e.g. *.pdf or *quickstart*"
     llm_description: "Glob pattern to match against the file name (last path segment). Examples: '*.pdf', '*api*', 'readme*'"
     form: llm
+  - name: groups
+    type: string
+    required: false
+    label:
+      en_US: "Groups"
+    human_description:
+      en_US: "Comma-separated group names the caller belongs to, e.g. eng,legal. When omitted, only public documents are shown."
+    llm_description: "Caller's group memberships as a comma-separated string, e.g. 'eng,legal'. Omit to find only public documents."
+    form: llm
 extra:
   python:
     source: tools/find.py

@@ -6,9 +6,9 @@ identity:
     zh_Hans: "Set Document Metadata"
 description:
   human:
-    en_US: "Assign metadata (slug, isPublic, groups, or custom fields) to a document in a Dify dataset. The slug field defines the document's virtual path in the filesystem (e.g. 'guides/quickstart')."
-    zh_Hans: "Assign metadata (slug, isPublic, groups, or custom fields) to a document in a Dify dataset."
-  llm: "Set a metadata key-value pair on a Dify dataset document. Use slug to assign a virtual filesystem path like 'guides/quickstart'. Use isPublic (true/false) and groups (JSON array string) for access control."
+    en_US: "Assign metadata (slug, is_public, groups) to a document in a Dify dataset. The slug field defines the document's virtual path (e.g. 'guides/quickstart'). is_public controls public visibility. groups is a comma-separated list of group names."
+    zh_Hans: "Assign metadata (slug, is_public, groups) to a document in a Dify dataset."
+  llm: "Set metadata fields on a Dify dataset document. Recognised fields: slug (virtual filesystem path), is_public (\"true\"/\"false\"), groups (comma-separated group names). Validation: is_public=\"false\" requires groups to be set."
 parameters:
   - name: dataset_id
     type: string
@@ -28,24 +28,30 @@ parameters:
       en_US: "The ID of the document to update"
     llm_description: "The document ID to set metadata on"
     form: llm
-  - name: key
-    type: string
+  - name: metadata
+    type: object
     required: true
     label:
-      en_US: "Metadata Key"
+      en_US: "Metadata"
     human_description:
-      en_US: "Metadata field name, e.g. slug, isPublic, groups"
-    llm_description: "Metadata field name. Use 'slug' to set the virtual filesystem path."
+      en_US: 'Object with fields: slug (virtual path), is_public ("true"/"false"), groups (comma-separated; optional unless is_public is "false"). Example: {"slug": "guides/quickstart", "is_public": "true"}'
+    llm_description: 'Object to set on the document. Recognized fields: slug (string, virtual path e.g. "guides/quickstart"), is_public (string "true" or "false"), groups (string, comma-separated group names e.g. "eng,legal"). Unknown fields are ignored. Validation: is_public="false" requires groups to be set.'
     form: llm
-  - name: value
-    type: string
-    required: true
-    label:
-      en_US: "Metadata Value"
-    human_description:
-      en_US: "Value for the metadata field"
-    llm_description: "Value for the metadata field. For slug: a path like 'guides/quickstart'. For isPublic: 'true' or 'false'."
-    form: llm
+    input_schema:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: "Virtual filesystem path for the document (e.g. 'guides/quickstart')"
+        is_public:
+          type: string
+          enum:
+            - "true"
+            - "false"
+          description: "Public visibility flag"
+        groups:
+          type: string
+          description: "Comma-separated group names (required when is_public is 'false')"
 extra:
   python:
     source: tools/metadata_set.py

@@ -4,6 +4,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
+from tools.access import doc_passes_filter, parse_groups
 from tools.dify_client import DifyClient
 
 
@@ -11,6 +12,7 @@ class CatTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
         dataset_id = tool_parameters["dataset_id"].strip()
         path = tool_parameters["path"].strip().strip("/")
+        caller_groups = parse_groups(tool_parameters.get("groups") or "")
 
         client = DifyClient(
             self.runtime.credentials["service_api_endpoint"],
@@ -19,6 +21,10 @@ class CatTool(Tool):
 
         doc = client.find_doc_by_slug(dataset_id, path)
         if not doc:
+            yield self.create_text_message(f"cat: {path}: No such file")
+            return
+
+        if not doc_passes_filter(doc, caller_groups):
             yield self.create_text_message(f"cat: {path}: No such file")
             return
 

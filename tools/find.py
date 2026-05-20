@@ -5,6 +5,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
+from tools.access import doc_passes_filter, parse_groups
 from tools.dify_client import DifyClient
 
 
@@ -13,6 +14,7 @@ class FindTool(Tool):
         dataset_id = tool_parameters["dataset_id"].strip()
         path = (tool_parameters.get("path") or "").strip().strip("/")
         name_pattern = tool_parameters["name_pattern"].strip()
+        caller_groups = parse_groups(tool_parameters.get("groups") or "")
 
         client = DifyClient(
             self.runtime.credentials["service_api_endpoint"],
@@ -23,6 +25,8 @@ class FindTool(Tool):
         matches = []
 
         for doc in docs:
+            if not doc_passes_filter(doc, caller_groups):
+                continue
             slug = client.get_slug(doc)
             if path and not (slug == path or slug.startswith(path + "/")):
                 continue

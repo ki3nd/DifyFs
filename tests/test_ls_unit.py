@@ -113,3 +113,43 @@ class TestBuildTree:
     def test_sorted_entries(self):
         tree = self._tree(["z/file", "a/file", "m/file"])
         assert tree[""] == sorted(tree[""])
+
+
+class TestBuildTreeWithAccessFilter:
+    """Tests for _build_tree receiving pre-filtered doc lists.
+
+    ls.py applies doc_passes_filter before calling _build_tree, so these
+    tests confirm the contract: excluded docs leave no trace in the tree.
+    """
+
+    def _tree(self, slugs):
+        real_client = DifyClient("http://x/v1", "k")
+        docs = [
+            {"id": f"doc{i}", "name": f"doc{i}",
+             "doc_metadata": [{"name": "slug", "value": s}]}
+            for i, s in enumerate(slugs)
+        ]
+        return _build_tree(docs, real_client)
+
+    def test_all_docs_filtered_out_root_absent_or_empty(self):
+        """When every doc is excluded before _build_tree, root is absent or empty."""
+        tree = self._tree([])
+        assert tree.get("", []) == []
+
+    def test_private_doc_path_absent_when_filtered(self):
+        """Private doc's virtual path must not appear when excluded before _build_tree."""
+        # Simulate: only public/readme passed the filter; private/secret did not
+        tree = self._tree(["public/readme"])
+        assert "public/" in tree[""]
+        assert "readme" in tree["public"]
+        # private/secret was never passed in — must produce no entries
+        assert "private/" not in tree.get("", [])
+        assert "secret" not in tree.get("private", [])
+
+    def test_dir_with_only_private_docs_absent_from_root(self):
+        """A virtual directory whose only docs were private is absent from root entries."""
+        # restricted/classified was excluded; open/guide passed the filter
+        tree = self._tree(["open/guide"])
+        root_entries = tree.get("", [])
+        assert "restricted/" not in root_entries
+        assert "open/" in root_entries

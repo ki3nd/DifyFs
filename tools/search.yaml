@@ -46,6 +46,15 @@ parameters:
       en_US: "Number of results to return (default 5)"
     llm_description: "Number of results to return, default 5"
     form: llm
+  - name: groups
+    type: string
+    required: false
+    label:
+      en_US: "Groups"
+    human_description:
+      en_US: "Caller's group memberships (comma-separated, e.g. eng,admin). Only documents visible to these groups are searched."
+    llm_description: "Comma-separated list of groups the caller belongs to. Controls which private documents are included in search. Omit to search only public documents."
+    form: llm
   - name: search_method
     type: select
     required: false

@@ -5,6 +5,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
+from tools.access import doc_passes_filter, parse_groups
 from tools.dify_client import DifyClient
 
 
@@ -18,15 +19,21 @@ class StatTool(Tool):
             self.runtime.credentials["api_key"],
         )
 
+        caller_groups = parse_groups(tool_parameters.get("groups") or "")
+
         doc = client.find_doc_by_slug(dataset_id, path)
+        if doc and not doc_passes_filter(doc, caller_groups):
+            doc = None  # treat as not found
+
         if not doc:
             # Check if path is a virtual directory (prefix of any slug)
             path_norm = path.strip("/")
             all_docs = client.list_documents(dataset_id)
             children = [
                 d for d in all_docs
-                if client.get_slug(d).startswith(path_norm + "/") or
-                (not path_norm and "/" in client.get_slug(d))
+                if doc_passes_filter(d, caller_groups)
+                and (client.get_slug(d).startswith(path_norm + "/") or
+                     (not path_norm and "/" in client.get_slug(d)))
             ]
             if path_norm == "" or children:
                 child_count = len(children)

@@ -6,6 +6,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
+from tools.access import doc_passes_filter, parse_groups
 from tools.dify_client import DifyClient
 
 
@@ -41,6 +42,7 @@ class GrepTool(Tool):
         dataset_id = tool_parameters["dataset_id"].strip()
         pattern_str = tool_parameters["pattern"].strip()
         path = (tool_parameters.get("path") or "").strip().strip("/")
+        caller_groups = parse_groups(tool_parameters.get("groups") or "")
 
         try:
             pattern = re.compile(pattern_str, re.IGNORECASE)
@@ -61,6 +63,12 @@ class GrepTool(Tool):
 
         if doc:
             # ── Single-file mode ──────────────────────────────────────────────
+            if not doc_passes_filter(doc, caller_groups):
+                msg = f"grep: no match for '{pattern_str}'"
+                if path:
+                    msg += f" in '{path}'"
+                yield self.create_text_message(msg)
+                return
             slug = client.get_slug(doc)
             segments = client.get_segments(dataset_id, doc["id"])
             results = _grep_segments(segments, pattern, slug)
@@ -71,9 +79,10 @@ class GrepTool(Tool):
             all_docs = client.list_documents(dataset_id)
             matching_docs = [
                 d for d in all_docs
-                if not path or (
+                if doc_passes_filter(d, caller_groups)
+                and (not path or (
                     lambda s: s == path or s.startswith(path + "/")
-                )(client.get_slug(d).strip("/"))
+                )(client.get_slug(d).strip("/")))
             ]
 
             with ThreadPoolExecutor(max_workers=5) as pool:

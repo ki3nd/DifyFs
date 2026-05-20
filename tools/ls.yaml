@@ -28,6 +28,15 @@ parameters:
       en_US: "Virtual directory path, e.g. / or guides or guides/api"
     llm_description: "Virtual directory path to list. Use '/' or empty for root. Example: 'guides' lists contents of the guides/ directory."
     form: llm
+  - name: groups
+    type: string
+    required: false
+    label:
+      en_US: "Groups"
+    human_description:
+      en_US: "Comma-separated group names the caller belongs to, e.g. eng,legal. When omitted, only public documents are shown."
+    llm_description: "Caller's group memberships as a comma-separated string, e.g. 'eng,legal'. Omit to see only public documents. When provided, also shows documents tagged for those groups."
+    form: llm
 extra:
   python:
     source: tools/ls.py

@@ -4,6 +4,7 @@ from typing import Any
 from dify_plugin import Tool
 from dify_plugin.entities.tool import ToolInvokeMessage
 
+from tools.access import doc_passes_filter, parse_groups
 from tools.dify_client import DifyClient
 
 
@@ -35,6 +36,7 @@ class LsTool(Tool):
     def _invoke(self, tool_parameters: dict[str, Any]) -> Generator[ToolInvokeMessage]:
         dataset_id = tool_parameters["dataset_id"].strip()
         path = _normalize_path(tool_parameters.get("path") or "")
+        caller_groups = parse_groups(tool_parameters.get("groups") or "")
 
         client = DifyClient(
             self.runtime.credentials["service_api_endpoint"],
@@ -42,6 +44,7 @@ class LsTool(Tool):
         )
 
         docs = client.list_documents(dataset_id)
+        docs = [d for d in docs if doc_passes_filter(d, caller_groups)]
         if not docs:
             yield self.create_text_message("(empty dataset)")
             return

@@ -70,18 +70,24 @@ class DifyClient:
         query: str,
         search_method: str = "semantic_search",
         top_k: int = 5,
+        metadata_filtering_conditions: dict | None = None,
     ) -> list[dict]:
-        """Call the retrieve endpoint and return records."""
-        body = {
-            "query": query,
-            "retrieval_model": {
-                "search_method": search_method,
-                "top_k": top_k,
-                "reranking_enable": False,
-                "score_threshold_enabled": False,
-            },
+        """Call the retrieve endpoint and return records.
+
+        metadata_filtering_conditions is passed as-is inside retrieval_model.
+        """
+        retrieval_model: dict = {
+            "search_method": search_method,
+            "top_k": top_k,
+            "reranking_enable": False,
+            "score_threshold_enabled": False,
         }
-        data = self._post(f"/datasets/{dataset_id}/retrieve", body)
+        if metadata_filtering_conditions:
+            retrieval_model["metadata_filtering_conditions"] = metadata_filtering_conditions
+        data = self._post(
+            f"/datasets/{dataset_id}/retrieve",
+            {"query": query, "retrieval_model": retrieval_model},
+        )
         return data.get("records", [])
 
     # ── Metadata ───────────────────────────────────────────────────────────────
@@ -102,18 +108,25 @@ class DifyClient:
         )
         return created["id"]
 
-    def set_document_metadata(
-        self, dataset_id: str, document_id: str, field_id: str, field_name: str, value: str
+    def get_document_info(self, dataset_id: str, document_id: str) -> dict:
+        """Fetch a single document including its current metadata entries."""
+        return self._get(f"/datasets/{dataset_id}/documents/{document_id}")
+
+    def update_document_metadata(
+        self, dataset_id: str, document_id: str, metadata_list: list[dict]
     ) -> None:
+        """Replace the full metadata of a document in one call.
+
+        Each entry in ``metadata_list`` should be ``{"id": ..., "name": ..., "value": ...}``.
+        Dify will auto-create any field that does not yet have an id.
+        """
         self._post(
             f"/datasets/{dataset_id}/documents/metadata",
             {
                 "operation_data": [
                     {
                         "document_id": document_id,
-                        "metadata_list": [
-                            {"id": field_id, "name": field_name, "value": value}
-                        ],
+                        "metadata_list": metadata_list,
                     }
                 ]
             },
