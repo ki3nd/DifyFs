@@ -28,23 +28,32 @@ Each document in your dataset gets a `slug` metadata field — its virtual path 
 
 ## Tools
 
-### `metadata_set` — Assign a virtual path to a document
+### `metadata_set` — Assign metadata to a document
 
-Set the `slug` (and any other metadata) on a document. This is the first step before using any other tool.
+Set the `slug`, `isPublic`, and/or `groups` on a document. The `metadata` parameter takes a JSON object.
 
 ```
 dataset_id: <your-dataset-id>
 document_id: <document-id>
-key: slug
-value: guides/quickstart
+metadata: {"slug": "guides/quickstart", "isPublic": "true"}
 ```
+
+Supported fields (all optional):
+
+| Field | Type | Description |
+|---|---|---|
+| `slug` | string | Virtual filesystem path (e.g. `guides/quickstart`) |
+| `isPublic` | `"true"` / `"false"` | Whether the document is publicly visible. Defaults to public when absent. |
+| `groups` | string | Comma-separated list of groups that can access this document (e.g. `"eng,admin"`). Required when `isPublic` is `"false"`. |
+
+Unknown keys are silently ignored.
 
 ### `ls` — List directory contents
 
 ```
-ls /                  → top-level dirs and files
-ls guides             → contents of guides/
-ls guides/api         → contents of guides/api/
+ls /                          → top-level dirs and files (public only)
+ls guides groups=eng          → contents of guides/ visible to the "eng" group
+ls guides/api                 → contents of guides/api/
 ```
 
 Output:
@@ -62,6 +71,7 @@ Returns the full text of a document by its slug path. Content is reconstructed b
 
 ```
 cat guides/quickstart
+cat guides/internal groups=eng,admin
 ```
 
 > **Note:** difyfs assumes datasets are chunked **without overlap**. If your dataset uses chunk overlap, `cat` output will contain duplicated text at chunk boundaries.
@@ -69,8 +79,9 @@ cat guides/quickstart
 ### `stat` — File or directory info
 
 ```
-stat guides/quickstart    → word count, tokens, indexing status, created_at, metadata
-stat guides               → type: directory, child count
+stat guides/quickstart                  → word count, tokens, indexing status, created_at, metadata
+stat guides                             → type: directory, child count
+stat guides groups=eng                  → child count includes only docs visible to "eng"
 ```
 
 ### `grep` — Search for a pattern
@@ -79,6 +90,7 @@ Searches line by line, returns `path:lineNum — line` output.
 
 ```
 grep dataset_id=<id> pattern=access_token path=guides
+grep dataset_id=<id> pattern=secret path=internal groups=eng
 ```
 
 Two modes:
@@ -92,15 +104,19 @@ Glob matching on the filename part of each slug. Supports `*` and `?`.
 
 ```
 find dataset_id=<id> name_pattern=*.md path=guides
+find dataset_id=<id> name_pattern=*.md groups=eng
 ```
 
 ### `search` — Semantic / full-text / hybrid search
 
 ```
 search dataset_id=<id> query="authentication flow" search_method=semantic_search path=guides
+search dataset_id=<id> query="deployment" groups=eng,admin
 ```
 
 Returns matching chunks with virtual file path, relevance score, and a 300-character preview.
+
+Search first collects all accessible document slugs (filtered by `groups` and `path`), then passes them to Dify's retrieve API via `metadata_filtering_conditions` so only those documents are searched.
 
 ## How slugs work
 
@@ -121,7 +137,28 @@ Use `metadata_set` to assign slugs to documents before navigating the filesystem
 * **Directory mode grep is best-effort** — Dify's retrieve API returns at most `top_k` chunks. Segments not in the top-k are not searched.
 * **No write operations** — difyfs is read-only by design. Document creation and deletion are not supported.
 
-## Future Work
+## Access Control
 
-* **Group-based filtering** — a `group` metadata field on documents could be used to scope `ls`, `find`, `grep`, and `search` to a named group (e.g. `group=engineering`).
-* **Public/private access control** — a `public` metadata field (`true`/`false`) could let tools filter out private documents, enabling basic visibility control within a shared dataset.
+DifyFS supports RBAC-style document visibility via two metadata fields:
+
+| Metadata field | Values | Meaning |
+|---|---|---|
+| `isPublic` | `"true"` (default) | Visible to all callers |
+| `isPublic` | `"false"` | Restricted — only callers whose `groups` intersect the document's `groups` can see it |
+| `groups` | comma-separated string | Groups that may access this document when `isPublic=false` |
+
+All tools (`ls`, `cat`, `stat`, `grep`, `find`) accept an optional `groups` parameter (comma-separated). This is the **caller's identity**:
+
+* `groups` absent → only `isPublic=true` documents are visible
+* `groups="eng"` → public documents + documents tagged `groups=eng`
+* `groups="eng,admin"` → public + documents tagged with `eng` or `admin`
+
+Documents without an `isPublic` tag default to public (backward compatible).
+
+Hidden directories: if all documents under a virtual directory are inaccessible, that directory is hidden. Inaccessible files return "No such file" (not "Permission denied").
+
+Use `metadata_set` to assign `isPublic` and `groups` to documents:
+
+```
+metadata_set dataset_id=<id> document_id=<doc-id> metadata={"isPublic": "false", "groups": "eng,admin"}
+```
